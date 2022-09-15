@@ -25,6 +25,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+from pdlearn.retry import requestsR
 from pdlearn.globalvar import web
 from webServerConf import WebMessage, WebQrUrl, web_db
 
@@ -48,7 +49,7 @@ def decode_img(data):
 
 
 def login(chat_id=None):
-    client = requests.session()
+    client = requestsR()
     # 1. 获取sign
     sign: str = client.get(url="https://pc-api.xuexi.cn/open/api/sns/sign").json().get("data").get("sign")
     # 2. 获取qr
@@ -686,7 +687,7 @@ class Mydriver:
         # url = quote('https://www.baidu.com/s?wd=' + content, safe=string.printable)
         url = quote("https://www.sogou.com/web?query=" +
                     content, safe=string.printable)
-        response = requests.get(url, headers=self.headers).text
+        response = requestsR().get(url, headers=self.headers).text
         counts = []
         for i, option in zip(['A', 'B', 'C', 'D', 'E', 'F'], options):
             count = response.count(option)

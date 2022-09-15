@@ -1,5 +1,6 @@
 import requests
 from pdlearn import color
+from pdlearn.retry import requestsR
 
 
 def up_info():
@@ -9,7 +10,7 @@ def up_info():
 
     __INFO = "TechXueXi最新下载地址为 https://github.com/TechXueXi/TechXueXi"
     try:
-        update_log = requests.get(
+        update_log = requestsR().get(
             "https://techxuexi.vercel.app/Update.html").content.decode(
             "utf8")
         update_log = update_log.split("\n")
