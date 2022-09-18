@@ -233,7 +233,7 @@ class Mydriver:
             auto.prompt("按回车键继续......")
             raise
 
-    def get_cookie_from_network(self, chat_id=None):
+    def get_cookie_from_network(self, chat_id=None, channelq = None):
         print("正在打开二维码登陆界面,请稍后")
         self.web_log('正在打开二维码登陆界面,请稍后')
         self.driver.get("https://pc.xuexi.cn/points/login.html")
@@ -264,7 +264,11 @@ class Mydriver:
         qrurl = ''
         qcbase64 = ''
         # 取出iframe中二维码，并发往钉钉
-        if gl.nohead == True or cfg_get("addition.SendLoginQRcode", 0) == 1:
+        if channelq != None: 
+            qcbase64 = self.getQRcode()
+            qrurl = channelq + quote_plus(decode_img(qcbase64))
+            channelq.put(qrurl) # 为队列送入二维码
+        elif gl.nohead == True or cfg_get("addition.SendLoginQRcode", 0) == 1:
             print("二维码将发往机器人...\n" + "=" * 60)
             qrurl, qcbase64 = self.sendmsg(chat_id)
 
@@ -319,7 +323,7 @@ class Mydriver:
                 print("循环模式开启，即将重新获取二维码")
                 self.web_log("循环模式开启，即将重新获取二维码")
                 time.sleep(3)
-                return self.get_cookie_from_network()
+                return self.get_cookie_from_network(channelq=channelq)
             self.quit()
 
             if str(e).find("check_hostname") > -1 and str(e).find("server_hostname") > -1:
@@ -365,9 +369,9 @@ class Mydriver:
         else:
             return path
 
-    def login(self, chat_id=None):
+    def login(self, chat_id=None, q=None):
         # 调用前要先尝试从cookie加载，失败再login
-        cookie_list = self.get_cookie_from_network(chat_id)
+        cookie_list = self.get_cookie_from_network(chat_id, channelq=q)
         return cookie_list
 
     def get_cookies(self):

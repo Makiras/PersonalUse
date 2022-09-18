@@ -1,3 +1,4 @@
+from pprint import pp
 from pdlearn import globalvar
 import os
 import re
@@ -5,6 +6,7 @@ import time
 import pickle
 import base64
 import requests
+import threading
 from requests.cookies import RequestsCookieJar
 from sys import argv
 from pdlearn import score
@@ -31,6 +33,8 @@ def get_fullname(userId):
             break
     if (nickname == ""):
         cookies = get_cookie(userId)
+        if len(cookies) == 0:
+            return "_"
         uid, total, scores, userName = score.get_score(cookies)
         # print("查找 userId: " + str(userId) + " 失败...")
         # pattern = re.compile(u'^[a-zA-Z0-9_\u4e00-\u9fa5]+$')
@@ -124,25 +128,57 @@ def get_cookie(userId):
     return []
 
 
+
+COOKIE_FILE_LOCK = threading.Lock()
 def save_cookies(cookies):
     # print(type(cookies), cookies)
-    template_json_str = '''{}'''
-    cookies_json_obj = file.get_json_data(
-        "user/cookies.json", template_json_str)
-    userId = get_userId(cookies)
-    cookies_bytes = pickle.dumps(cookies)
-    cookies_b64 = base64.b64encode(cookies_bytes)
-    cookies_json_obj[str(userId)] = str(cookies_b64, encoding='utf-8')
-    # print(type(cookies_json_obj), cookies_json_obj)
-    file.save_json_data("user/cookies.json", cookies_json_obj)
+    global COOKIE_FILE_LOCK
+    with COOKIE_FILE_LOCK:
+        template_json_str = '''{}'''
+        cookies_json_obj = file.get_json_data(
+            "user/cookies.json", template_json_str)
+        userId = get_userId(cookies)
+        cookies_bytes = pickle.dumps(cookies)
+        cookies_b64 = base64.b64encode(cookies_bytes)
+        cookies_json_obj[str(userId)] = str(cookies_b64, encoding='utf-8')
+        # print(type(cookies_json_obj), cookies_json_obj)
+        file.save_json_data("user/cookies.json", cookies_json_obj)
 
 
 def remove_cookie(uid):
+    global COOKIE_FILE_LOCK
+    with COOKIE_FILE_LOCK:
+        template_json_str = '''{}'''
+        cookies_json_obj = file.get_json_data(
+            "user/cookies.json", template_json_str)
+        cookies_json_obj.pop(str(uid))
+        file.save_json_data("user/cookies.json", cookies_json_obj)
+
+
+def save_push_plus_token(uid, token):
     template_json_str = '''{}'''
-    cookies_json_obj = file.get_json_data(
-        "user/cookies.json", template_json_str)
-    cookies_json_obj.pop(str(uid))
-    file.save_json_data("user/cookies.json", cookies_json_obj)
+    pp_json_obj = file.get_json_data(
+        "user/push_plus_token.json", template_json_str)
+    pp_json_obj[str(uid)] = token
+    file.save_json_data("user/push_plus_token.json", pp_json_obj)
+
+
+def get_push_plus_token(uid):
+    template_json_str = '''{}'''
+    pp_json_obj = file.get_json_data(
+        "user/push_plus_token.json", template_json_str)
+    if (str(uid) in pp_json_obj.keys()):
+        return pp_json_obj[str(uid)]
+    else:
+        return ""
+
+
+def remove_push_plus_token(uid):
+    template_json_str = '''{}'''
+    pp_json_obj = file.get_json_data(
+        "user/push_plus_token.json", template_json_str)
+    pp_json_obj.pop(str(uid))
+    file.save_json_data("user/push_plus_token.json", pp_json_obj)
 
 
 def get_article_video_json():

@@ -1,0 +1,200 @@
+<!DOCTYPE HTML>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>自助学习平台</title>
+  <link crossorigin="anonymous"
+    integrity="sha512-6KY5s6UI5J7SVYuZB4S/CZMyPylqyyNZco376NM2Z8Sb8OxEdp02e1jkKk/wZxIEmjQ6DRCEBhni+gpr9c4tvA=="
+    href="https://lib.baomitu.com/twitter-bootstrap/5.1.1/css/bootstrap.min.css" rel="stylesheet">
+  <script crossorigin="anonymous"
+    integrity="sha512-lTLt+W7MrmDfKam+r3D2LURu0F47a3QaW5nF0c6Hl0JDZ57ruei+ovbg7BrZ+0bjVJ5YgzsAWE+RreERbpPE1g=="
+    src="https://lib.baomitu.com/axios/0.21.4/axios.min.js"></script>
+  <script crossorigin="anonymous" integrity="sha384-RIQuldGV8mnjGdob13cay/K1AJa+LR7VKHqSXrrB5DPGryn4pMUXRLh92Ev8KlGF"
+    src="https://lib.baomitu.com/sweetalert/2.1.2/sweetalert.min.js"></script>
+  <script crossorigin="anonymous"
+    integrity="sha512-sIqUEnRn31BgngPmHt2JenzleDDsXwYO+iyvQ46Mw6RL+udAUZj2n/u/PGY80NxRxynO7R9xIGx5LEzw4INWJQ=="
+    src="https://lib.baomitu.com/clipboard.js/2.0.8/clipboard.min.js"></script>
+  <style type="text/css">
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      padding-top: 40px;
+      padding-bottom: 40px;
+      background-color: #f5f5f5;
+    }
+
+    .form-signin {
+      width: 100%;
+      max-width: 330px;
+      padding: 15px;
+      margin: auto;
+    }
+
+    .form-signin .form-floating:focus-within {
+      z-index: 2;
+    }
+
+    .form-signin input[name="token"] {
+      margin-bottom: 1rem;
+      margin-top: 1rem;
+    }
+
+    label {
+      user-select: none;
+    }
+
+    ::-ms-reveal {
+      display: none;
+    }
+
+    .hover-text {
+      height: 30px;
+      overflow: hidden;
+    }
+
+    .hover-a {
+      transition: all 0.2s;
+    }
+
+    #btn:hover .hover-a,
+    #btn:focus .hover-a {
+      margin-top: -30px;
+    }
+
+    #btn.loading .hover-a {
+      margin-top: -60px !important;
+    }
+
+    #showpass {
+      position: absolute;
+      right: 15px;
+      top: 16px;
+      cursor: pointer;
+    }
+
+    #showpass .bi-eye-slash-fill {
+      display: none;
+    }
+
+    #showpass.show .bi-eye-fill {
+      display: none;
+    }
+
+    #showpass.show .bi-eye-slash-fill {
+      display: block;
+    }
+
+    #showpass svg {
+      fill: #aaa;
+      width: 24px;
+      height: 24px;
+    }
+
+    #showpass:hover svg {
+      fill: #999;
+    }
+
+    .tips {
+      padding-top: 50px;
+      user-select: none;
+    }
+
+    .tips-title {
+      text-align: center;
+      display: block;
+    }
+
+    .tips-contents {
+      font-size: 14px;
+    }
+
+    small {
+      display: block;
+      font-size: 15px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <form id="form" class="form-signin">
+      <h1 class="h3 mb-3 fw-normal text-center">
+        自助学习平台
+        <small>你已经是成熟的平台了，该学会自己学习了。</small>
+        <small>当前的用户是：{{userNames}}</small>
+      </h1>
+      <div class="form-floating">
+        <input type="password" class="form-control" id="token" name="token" placeholder="PushPlus Token" style="display: {{ hasUid }};">
+        <label for="password">PushPlus Token</label>
+        <div class="showpass" id="showpass">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="bi bi-eye-fill" viewBox="0 0 16 16">
+            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" />
+            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="bi bi-eye-slash-fill"
+            viewBox="0 0 16 16">
+            <path
+              d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588zM5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z" />
+            <path
+              d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12-.708.708z" />
+          </svg>
+        </div>
+      </div>
+      <button id="btn" class="w-100 btn btn-lg btn-primary" type="submit">
+        <div class="hover-text">
+          <div class="hover-a">
+            {{ userAction }}<br>给我学<br>在学了在学了
+          </div>
+        </div>
+      </button>
+      <div class="tips">
+        <a href="javascript:" class="tips-title" id="tips-title">怎么学？</a><br>
+        <ol class="tips-contents" id="tips-contents" style="display: none;">
+          <li>在此处注册成功后，平台会立刻进行一次自动学习。此后自动学习将每天进行一次，执行结果请到原系统查询。</li>
+          <li>由于技术限制，每两天会重新登录一次，系统会给你自动发消息来提醒你登录。</li>
+        </ol>
+      </div>
+    </form>
+  </main>
+</body>
+<script>
+  const b = document.getElementById('btn')
+  const p = document.getElementById('token')
+  document.getElementById('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    b.disabled = true
+    b.classList.add("loading")
+    try {
+      const { data } = await axios.post("/learn", `token=${encodeURIComponent(p.value)}`)
+      swal(data.substr(1), {
+        icon: data.substr(0, 1) == 'x' ? 'error' : "success"
+      });
+    } catch (e) {
+      swal("网络错误", {
+        icon: "error"
+      });
+    }
+    b.disabled = false
+    b.classList.remove("loading")
+  })
+  document.getElementById("showpass").addEventListener("click", () => {
+    p.type = p.type === 'password' ? 'text' : 'password'
+    document.getElementById("showpass").className = p.type === 'password' ? 'showpass' : 'showpass show'
+  })
+  document.getElementById("tips-title").addEventListener("click", () => {
+    document.getElementById("tips-contents").style.display = "block"
+  })
+  const c = new ClipboardJS("#copy")
+  c.on('success', function (e) {
+    swal("复制成功！", {
+      icon: "success"
+    })
+  });
+</script>

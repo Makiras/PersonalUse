@@ -24,6 +24,7 @@ scheme = ""
 lock = False
 stime = False
 single = True
+tg_jump_url = ""
 tg_bot = TelegarmHandler
 wechat = WechatHandler
 web = WebHandler()

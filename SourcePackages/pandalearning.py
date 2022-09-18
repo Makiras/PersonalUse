@@ -3,6 +3,7 @@ import os
 import sys
 import time
 from sys import argv
+from queue import Queue
 
 from pdlearn import boot
 
@@ -39,8 +40,9 @@ def get_argv():
     return gl.nohead, gl.lock, gl.stime, gl.single
 
 
-def start_learn(uid, name):
+def start_learn(uid, name, custom_push=None):
     #  0 读取版本信息
+    push = custom_push if custom_push else gl.pushprint
     start_time = time.time()
     nohead, lock, stime, Single = get_argv()
     print("是否无头模式：{0} {1}".format(nohead, os.getenv('Nohead')))
@@ -62,11 +64,19 @@ def start_learn(uid, name):
         if name == "新用户":
             msg = "需要增加新用户，请扫码登录，否则请无视"
         else:
-            msg = name+" 登录信息失效，请重新扫码"
-        # print(msg)
-        gl.pushprint(msg, chat_id=uid)
+            if gl.tg_jump_url != "":
+                msg = "用户 {0} , uid {1} 的cookie失效，请重新访问[登录链接]({2})进行登录。".format(
+                    name, uid, "{}?uid={}".format(gl.tg_jump_url, uid))
+                return
+            else:
+                msg = "用户 {0} , uid {1} 的cookie失效，请重新访问登录"
+        print(msg)
+        push(msg)
+        if gl.tg_jump_url != "":
+            return
+
         if gl.pushmode == "6":
-            gl.pushprint("web模式跳过自动获取二维码,请手动点击添加按钮", chat_id=uid)
+            push("web模式跳过自动获取二维码,请手动点击添加按钮", chat_id=uid)
             print(color.red("【#️⃣】 若直接退出请运行：webserverListener.py"))
             return
         driver_login = Mydriver()
@@ -87,7 +97,7 @@ def start_learn(uid, name):
     video_index = 1  # user.get_video_index(uid)
 
     total, scores = show_score(cookies)
-    gl.pushprint(output, chat_id=uid)
+    push(output, chat_id=uid)
     if TechXueXi_mode in ["1", "3"]:
 
         article_thread = threads.MyThread(
@@ -115,8 +125,10 @@ def start_learn(uid, name):
         user.refresh_all_cookies(live_time=11.90)
 
     seconds_used = int(time.time() - start_time)
-    gl.pushprint(name+" 总计用时 " + str(math.floor(seconds_used / 60)) +
-                 " 分 " + str(seconds_used % 60) + " 秒", chat_id=uid)
+    if seconds_used < 60:
+        return
+    push(name+" 总计用时 " + str(math.floor(seconds_used / 60)) +
+         " 分 " + str(seconds_used % 60) + " 秒", chat_id=uid)
     show_scorePush(cookies, chat_id=uid)
     try:
         user.shutdown(stime)
@@ -172,6 +184,23 @@ def get_all_user_name():
     return names
 
 
+def get_all_user_id():
+    user_list = user.list_user(printing=False)
+    ids = []
+    for i in range(len(user_list)):
+        ids.append(user_list[i][0])
+    return ids
+
+
+def get_all_user():
+    """
+    获取所有用户的信息
+    :return: 返回一个列表，列表中的每个元素是一个tuple，tuple中包含用户的id，name
+    """
+    user_list = user.list_user(printing=False)
+    return user_list
+
+
 def add_user(chat_id=None):
     get_argv()
     gl.pushprint("请登录（登录方式请仔细阅读文档，如果觉得这是让你下载，就是你没仔细读文档）：", chat_id=chat_id)
@@ -190,7 +219,7 @@ def add_user(chat_id=None):
 
 
 if __name__ == '__main__':
-    if(cfg_get('display.banner') != False):  # banner文本直接硬编码，不要放在conf中
+    if (cfg_get('display.banner') != False):  # banner文本直接硬编码，不要放在conf中
         print("=" * 60 +
               '\n    我们的网站，GitHub 等页面已经被中国大陆的浏览器加入黑名单，请用谷歌浏览器 chrome 打开我们的站点。' +
               '\n    科技强 guo 官方网站：https://techxuexi.js.org' +
