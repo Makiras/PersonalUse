@@ -194,7 +194,7 @@ def learn_to_win():
 def learn():
     uid = request.args.get("uid")
     if uid is not None:
-        full_name = pdu.get_full_name(uid)
+        full_name = pdu.get_fullname(uid)
         if full_name == "_":
             return "Bad Request", 400
         q = Queue()

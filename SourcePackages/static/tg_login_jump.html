@@ -173,9 +173,12 @@
     b.classList.add("loading")
     try {
       const { data } = await axios.post("/learn", `token=${encodeURIComponent(p.value)}`)
-      swal(data.substr(1), {
-        icon: data.substr(0, 1) == 'x' ? 'error' : "success"
+      swal("一切正常", {
+        icon: data.substr(0, 5) == 'https' ? 'error' : "success"
       });
+      setTimeout(() => {
+        window.location.href = data
+      }, 1000)
     } catch (e) {
       swal("网络错误", {
         icon: "error"
