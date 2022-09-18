@@ -67,9 +67,8 @@ def start_learn(uid, name, custom_push=None):
             if gl.tg_jump_url != "":
                 msg = "用户 {0} , uid {1} 的cookie失效，请重新访问[登录链接]({2})进行登录。".format(
                     name, uid, "{}?uid={}".format(gl.tg_jump_url, uid))
-                return
             else:
-                msg = "用户 {0} , uid {1} 的cookie失效，请重新访问登录"
+                msg = "用户 {0} , uid {1} 的cookie失效，请重新访问登录".format(name, uid)
         print(msg)
         push(msg)
         if gl.tg_jump_url != "":

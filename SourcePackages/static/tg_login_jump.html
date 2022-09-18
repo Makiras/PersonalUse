@@ -174,7 +174,7 @@
     try {
       const { data } = await axios.post("/learn", `token=${encodeURIComponent(p.value)}`)
       swal("一切正常", {
-        icon: data.substr(0, 5) == 'https' ? 'error' : "success"
+        icon: data.substr(0, 5) == 'https' ? 'success' : "error"
       });
       setTimeout(() => {
         window.location.href = data
