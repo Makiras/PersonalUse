@@ -266,7 +266,7 @@ class Mydriver:
         # 取出iframe中二维码，并发往钉钉
         if channelq != None: 
             qcbase64 = self.getQRcode()
-            qrurl = channelq + quote_plus(decode_img(qcbase64))
+            qrurl = qcbase64 + quote_plus(decode_img(qcbase64))
             channelq.put(qrurl) # 为队列送入二维码
         elif gl.nohead == True or cfg_get("addition.SendLoginQRcode", 0) == 1:
             print("二维码将发往机器人...\n" + "=" * 60)

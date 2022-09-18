@@ -170,6 +170,7 @@ def update_user(q, uid, token=None):
         push = PlusPushHandler(token)
     else:
         push = PlusPushHandler(pdu.get_push_plus_token(uid))
+    pdl.get_argv()
     driver_login = Mydriver()
     cookies = driver_login.login(q=q)
     driver_login.quit()
