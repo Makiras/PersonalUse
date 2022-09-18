@@ -15,6 +15,7 @@ try:
     from pdlearn.answer_question import daily, weekly, zhuanxiang
     from pdlearn.article_video import article, video
     from pdlearn.config import cfg_get
+    from pdlearn.pluspush import PlusPushHandler
     from pdlearn.mydriver import Mydriver
     from pdlearn.score import show_score, show_scorePush
 except ImportError as e:
@@ -96,7 +97,8 @@ def start_learn(uid, name, custom_push=None):
     video_index = 1  # user.get_video_index(uid)
 
     total, scores = show_score(cookies)
-    push(output, chat_id=uid)
+    if custom_push is None:
+        push(output, chat_id=uid)
     if TechXueXi_mode in ["1", "3"]:
 
         article_thread = threads.MyThread(
@@ -146,8 +148,13 @@ def start(nick_name=None):
     for i in range(len(user_list)):
         try:
             if nick_name is None or nick_name == user_list[i][1] or nick_name == user_list[i][0]:
+                if user.get_push_plus_token(user_list[i][0]) != "":
+                    custom_push = PlusPushHandler(
+                        user.get_push_plus_token(user_list[i][0]))
+                else:
+                    custom_push = None
                 _learn = threads.MyThread(
-                    user_list[i][0]+"开始学xi", start_learn, user_list[i][0], user_list[i][1], lock=Single)
+                    user_list[i][0]+"开始学xi", start_learn, user_list[i][0], user_list[i][1], custom_push, lock=Single)
                 _learn.start()
         except:
             gl.pushprint("学习页面崩溃，学习终止")
