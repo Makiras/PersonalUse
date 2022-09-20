@@ -127,8 +127,9 @@ def get_cookie(userId):
     return []
 
 
-
 COOKIE_FILE_LOCK = threading.Lock()
+
+
 def save_cookies(cookies):
     # print(type(cookies), cookies)
     global COOKIE_FILE_LOCK
@@ -272,6 +273,12 @@ def refresh_all_cookies(live_time=8.0, display_score=False):  # cookie有效时�
                     str(int(remain_time * 10) / 10) + " 小时."
                 print(color.green(msg), end="")
                 msgInfo[uid] = msg
+                try:
+                    score.get_score(cookie_list)
+                except:
+                    print(color.red("【无法获取积分信息】"+str(uid)))
+                    remain_time = -1
+
                 if remain_time < 0:
                     print(color.red(" 已过期 需要重新登陆，将自动移除此cookie."))
                     remove_cookie(uid)

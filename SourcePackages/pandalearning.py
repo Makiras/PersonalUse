@@ -66,7 +66,7 @@ def start_learn(uid, name, custom_push=None):
             msg = "需要增加新用户，请扫码登录，否则请无视"
         else:
             if gl.tg_jump_url != "":
-                msg = "用户 {0} , uid {1} 的cookie失效，请重新访问[登录链接]({2})进行登录。".format(
+                msg = "用户 {0} , uid {1} 的cookie失效，请重新访问[登录链接]({2})进行登录。该链接反应较慢，请务必只点击1次！".format(
                     name, uid, "{}?uid={}".format(gl.tg_jump_url, uid))
             else:
                 msg = "用户 {0} , uid {1} 的cookie失效，请重新访问登录".format(name, uid)
@@ -96,7 +96,20 @@ def start_learn(uid, name, custom_push=None):
     article_index = user.get_article_index(uid)
     video_index = 1  # user.get_video_index(uid)
 
-    total, scores = show_score(cookies)
+    total, scores = None, None
+    try:
+        total, scores = show_score(cookies)
+    except Exception as e:
+        print("复查时获取 {uid} 积分失败, 网络错误或者过期了", e)
+        if gl.tg_jump_url != "":
+            msg = "用户 {0} , uid {1} 的cookie失效，请重新访问[登录链接]({2})进行登录。该链接反应较慢，请务必只点击1次！".format(
+                name, uid, "{}?uid={}".format(gl.tg_jump_url, uid))
+        else:
+            msg = "用户 {0} , uid {1} 的cookie失效，请重新访问登录".format(name, uid)
+        print(msg)
+        push(msg)
+        return
+    
     if custom_push is None:
         push(output, chat_id=uid)
     if TechXueXi_mode in ["1", "3"]:
@@ -126,11 +139,15 @@ def start_learn(uid, name, custom_push=None):
         user.refresh_all_cookies(live_time=11.90)
 
     seconds_used = int(time.time() - start_time)
+    
+    print("学习用时：{0} 分 {1} 秒".format(seconds_used // 60, seconds_used % 60))
     if seconds_used < 60:
         return
+    
+    score_str = show_scorePush(cookies, chat_id=uid, only_gen=True)
     push(name+" 总计用时 " + str(math.floor(seconds_used / 60)) +
-         " 分 " + str(seconds_used % 60) + " 秒", chat_id=uid)
-    show_scorePush(cookies, chat_id=uid)
+         " 分 " + str(seconds_used % 60) + " 秒\n\n"+score_str, chat_id=uid)
+    
     try:
         user.shutdown(stime)
     except Exception as e:
@@ -148,9 +165,10 @@ def start(nick_name=None):
     for i in range(len(user_list)):
         try:
             if nick_name is None or nick_name == user_list[i][1] or nick_name == user_list[i][0]:
+                print("开始学习用户：", user_list[i][1])
                 if user.get_push_plus_token(user_list[i][0]) != "":
                     custom_push = PlusPushHandler(
-                        user.get_push_plus_token(user_list[i][0]))
+                        user.get_push_plus_token(user_list[i][0])).fttext
                 else:
                     custom_push = None
                 _learn = threads.MyThread(

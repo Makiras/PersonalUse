@@ -13,7 +13,7 @@ class PlusPushHandler:
         headers = {"Content-Type": "application/json"}  # 定义数据类型
         data = {
             "token": self.token,
-            "title": "Learn To Win 需要你重新登陆",
+            "title": "学习需要重新登陆",
             "content": "<img src='"+msgurl+"'/>"
         }
 
@@ -26,7 +26,7 @@ class PlusPushHandler:
         headers = {"Content-Type": "application/json"}  # 定义数据类型
         data = {
             "token": self.token,
-            "title": "Learn To Win 需要你注意",
+            "title": "学习需要你注意",
             "content": text,
             "topic": self.topic,
             "template": "markdown"

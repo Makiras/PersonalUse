@@ -1,4 +1,5 @@
 from pickle import TRUE
+from subprocess import TimeoutExpired
 from pdlearn import globalvar
 import requests
 from requests.cookies import RequestsCookieJar
@@ -40,25 +41,29 @@ def show_score(cookies):
     return total, scores
 
 
-def show_scorePush(cookies, chat_id=None):
+def show_scorePush(cookies, chat_id=None, only_gen=False):
     userId, total, scores, userName = get_score(cookies)
-    globalvar.pushprint(userName+" 当前学 xi 总积分：" + str(total) + "\t" + "今日得分：" + str(scores["today"]) +
-                        "\n阅读文章:" + handle_score_color(scores["article_num"], const.article_num_all, False) + "," +
-                        "观看视频:" + handle_score_color(scores["video_num"], const.video_num_all, False) + "," +
-                        "文章时长:" + handle_score_color(scores["article_time"], const.article_time_all, False) + "," +
-                        "视频时长:" + handle_score_color(scores["video_time"], const.video_time_all, False) + "," +
-                        "\n每日登陆:" + handle_score_color(scores["login"], const.login_all, False) + "," +
-                        "每日答题:" + handle_score_color(scores["daily"], const.daily_all, False) + "," +
-                        "每周答题:" + handle_score_color(scores["weekly"], const.weekly_all, False) + "," +
-                        "专项答题:" + handle_score_color(scores["zhuanxiang"], const.zhuanxiang_all, False), chat_id)
+    res_str = userName+" 当前学 xi 总积分：" + str(total) + "\t" + "今日得分：" + str(scores["today"]) +\
+        "\n阅读文章:" + handle_score_color(scores["article_num"], const.article_num_all, False) + "," +\
+        "观看视频:" + handle_score_color(scores["video_num"], const.video_num_all, False) + "," +\
+        "文章时长:" + handle_score_color(scores["article_time"], const.article_time_all, False) + "," +\
+        "视频时长:" + handle_score_color(scores["video_time"], const.video_time_all, False) + "," +\
+        "\n每日登陆:" + handle_score_color(scores["login"], const.login_all, False) + "," +\
+        "每日答题:" + handle_score_color(scores["daily"], const.daily_all, False) + "," +\
+        "每周答题:" + handle_score_color(scores["weekly"], const.weekly_all, False) + "," +\
+        "专项答题:" + \
+        handle_score_color(scores["zhuanxiang"], const.zhuanxiang_all, False)
+    if only_gen:
+        return res_str
+    globalvar.pushprint(res_str, chat_id)
     return total, scores
 
 
 def get_score(cookies):
-    chat_id = None
+    uid = None
     th_name = threading.current_thread().name
     if "开始学xi" in th_name:
-        chat_id = th_name[:th_name.index("开始学xi")]
+        uid = th_name[:th_name.index("开始学xi")]
     requests.adapters.DEFAULT_RETRIES = 5
     jar = RequestsCookieJar()
     for cookie in cookies:
@@ -66,10 +71,10 @@ def get_score(cookies):
     total_json = requestsR().get("https://pc-api.xuexi.cn/open/api/score/get", cookies=jar,
                                  ).content.decode("utf8")
     if not json.loads(total_json)["data"]:
-        globalvar.pushprint("cookie过期，请重新登录", chat_id)
-        if chat_id:
-            remove_cookie(chat_id)
-        raise
+        globalvar.pushprint("{} cookie过期，请重新登录".format(uid), uid)
+        if uid:
+            remove_cookie(uid)
+        raise TimeoutExpired
 
     total = int(json.loads(total_json)["data"]["score"])
     #userId = json.loads(total_json)["data"]["userId"]

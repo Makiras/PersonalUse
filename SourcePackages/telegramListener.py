@@ -179,7 +179,8 @@ def update_user(q, uid, token=None):
         return
     pdu.save_cookies(cookies)
     uid = pdu.get_userId(cookies)
-    pdu.save_push_plus_token(uid, token)
+    if token:
+        pdu.save_push_plus_token(uid, token)
     user_fullname = pdu.get_fullname(uid)
     pdu.update_last_user(uid)
     push.fttext("你的上次登录成功了！你的ID是：{}，你的名字是：{}".format(uid, user_fullname))
@@ -210,7 +211,7 @@ def learn():
 @app.route("/learn", methods=['POST'])
 def learn_post():
     token = request.form.get("token")
-    if len(token) < 5:  # wrong token
+    if len(token) < 5 or token.startswith("http"):
         return "Bad Request", 400
     else:  # new
         q = Queue()
